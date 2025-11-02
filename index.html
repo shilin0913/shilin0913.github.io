@@ -1,13 +1,312 @@
 <html>
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <body style="background-color:#000000">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>爱心~</title>
+<style>
+  /* 原有样式保持不变 */
+  html,body{
+    height:100%;margin:0;overflow:hidden;
+    font-family:"微软雅黑",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% 45%, rgba(255,255,255,.65), rgba(255,255,255,0) 60%),
+      radial-gradient(circle at 50% 45%, #fff4f7 0%, #c9eaff 100%);
+  }
+  .stage{position:relative;width:100%;height:100%;}
+  .msg{
+    position:absolute;left:50%;top:50%;
+    padding:10px 16px;border-radius:16px;
+    color:#fff;font-weight:700;
+    font-size:clamp(14px,3vmin,22px);
+    text-shadow:0 2px 8px rgba(0,0,0,.28);
+    opacity:0;
+    transform:
+      translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.75) rotate(var(--rot));
+    animation: flight var(--dur) cubic-bezier(.25,.7,.3,1) var(--delay) both;
+    box-shadow:0 8px 26px rgba(0,0,0,.22);
+    will-change: transform, opacity;
+    background: var(--bg);
+  }
+
+  @keyframes flight{
+    0%{
+      opacity:0;
+      transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.75) rotate(var(--rot));
+    }
+    18%{ opacity:1; }
+    45%{
+      transform:translate(-50%,-50%) translate(calc(var(--dx)*.2),calc(var(--dy)*.2)) scale(1.06);
+    }
+    70%{
+      transform:translate(-50%,-50%) translate(calc(var(--dx)*1.15),calc(var(--dy)*1.15)) scale(.95) rotate(var(--rot));
+    }
+    88%{
+      transform:translate(-50%,-50%) translate(calc(var(--heart-x)*.6),calc(var(--heart-y)*.6)) scale(.9) rotate(var(--heart-rot));
+    }
+    100%{
+      opacity:1;
+      transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1) rotate(var(--heart-rot));
+    }
+  }
+
+  .msg::before,.msg::after{
+    content:'';
+    position:absolute;left:50%;top:0;
+    background:inherit;border-radius:50px 50px 0 0;
+    width:22px;height:34px;opacity:0;transition:opacity .28s ease;
+    transform-origin:0 100%;transform:rotate(-45deg);
+  }
+  .msg::after{ left:0;transform-origin:100% 100%;transform:rotate(45deg); }
+  .msg.heart-mode{ color:transparent; text-shadow:none; }
+  .msg.heart-mode::before,.msg.heart-mode::after{ opacity:1; }
+
+  .msg.locked{
+    animation:none;
+    transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1) rotate(var(--heart-rot));
+    opacity:1;
+  }
+  .msg.locked.pulse{
+    animation:pulse 2.2s ease-in-out 1;
+  }
+  @keyframes pulse{
+    0%,100%{ transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1); }
+    50%   { transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1.08); }
+  }
+
+  .msg.burst{
+    animation: burst 1.4s cubic-bezier(.17,.6,.2,1) forwards;
+  }
+  @keyframes burst{
+    0%{
+      opacity:1;
+      transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1);
+      filter:blur(0);
+    }
+    70%{
+      opacity:.9;
+      transform:
+        translate(-50%,-50%)
+        translate(calc(var(--heart-x) + var(--bx)*0.7), calc(var(--heart-y) + var(--by)*0.7))
+        scale(.9) rotate(var(--rot));
+      filter:blur(.3px);
+    }
+    100%{
+      opacity:0;
+      transform:
+        translate(-50%,-50%)
+        translate(calc(var(--heart-x) + var(--bx)), calc(var(--heart-y) + var(--by)))
+        scale(.7) rotate(var(--rot));
+      filter:blur(1px);
+    }
+  }
+
+  .center-title{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    font-weight:800;letter-spacing:.12em;
+    font-size:clamp(18px,4vmin,28px);
+    color:rgba(255,105,180,.6);
+    text-shadow:0 2px 10px rgba(255,105,180,.15);
+    opacity:.0; pointer-events:none;
+    animation:titleIn 1.2s ease 0.8s both;
+  }
+  @keyframes titleIn{
+    from{opacity:0; transform:translate(-50%,-55%);}
+    to  {opacity:.95; transform:translate(-50%,-50%);}
+  }
+
+  .replay{
+    position:absolute;right:18px;bottom:18px;
+    padding:10px 14px;border:none;border-radius:10px;
+    background:rgba(255,255,255,.5);
+    backdrop-filter:blur(8px);
+    color:#222;font-weight:600;cursor:pointer;
+    box-shadow:0 5px 20px rgba(0,0,0,.22);
+  }
+  
+  /* 新增：音乐播放提示样式 */
+  .music-prompt {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    color: #333;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+  }
+</style>
 </head>
-     <head>
-          <title>Happy!</title>
-     </head>
+<body>
+  <!-- 背景音乐 -->
+  <audio id="background-music" src="https://lf26-music-east.douyinstatic.com/obj/ies-music-hj/7495920705440140091.mp3" loop playsinline>
+   您的浏览器不支持音频播放
+  </audio>
+  
+  <!-- 音乐播放提示 -->
+  <div class="music-prompt" id="music-prompt">
+    点击页面任意位置开始播放音乐
+  </div>
+  
+  <div class="stage" id="stage">
+    <div class="center-title" id="title">for you ♥</div>
+  </div>
+  <button class="replay" id="replay">重放</button>
+
+<script>
+/* —— 原有脚本保持不变，新增音乐播放控制 —— */
+const tips=[
+  '想念在风里飘','月亮为你亮','喜欢你很久了','你是我的心动','温柔落在人间',
+  '星光都为你闪','梦里有你真好','世界因你柔软','心跳为你加速','有你真好',
+  '你是独一无二的光','遇见你是浪漫的开始','晚风也温柔了','你的笑融化星河',
+  '想陪你看星星','今夜的梦给你','宇宙都在偏爱你','你是人间的奇迹',
+  '拥抱要紧一点','想你成习惯了','一瞬也是永恒','你眼里有星星','你的温柔让我沦陷',
+  '风都是甜的','为你心动不止','想成为你的例外','心有桃花一片','你是我梦里的光',
+  '想和你看海','此刻的风想你','遇见你后时间变慢','所有浪漫都与你有关',
+  '想靠近你一点','你的名字是我心事','心软是因为你','想牵你的手看日落',
+  '每次想你星星都亮了','心跳藏不住','有你世界亮一点','甜在风里也在心里'
+];
+
+const stage  = document.getElementById('stage');
+const replay = document.getElementById('replay');
+const title  = document.getElementById('title');
+const music = document.getElementById('background-music');
+const musicPrompt = document.getElementById('music-prompt');
+
+// 处理音乐播放
+function setupMusic() {
+  // 尝试播放音乐的函数
+  function tryPlayMusic() {
+    music.play().then(() => {
+      // 播放成功，隐藏提示
+      musicPrompt.style.opacity = '0';
+      setTimeout(() => {
+        musicPrompt.style.display = 'none';
+      }, 500);
+      // 移除事件监听，避免重复触发
+      document.removeEventListener('click', tryPlayMusic);
+      document.removeEventListener('touchstart', tryPlayMusic);
+    }).catch(error => {
+      console.log('播放失败，需要用户交互:', error);
+    });
+  }
+  
+  // 监听用户交互来触发播放
+  document.addEventListener('click', tryPlayMusic);
+  document.addEventListener('touchstart', tryPlayMusic);
+  
+  // 重放按钮也触发播放
+  replay.addEventListener('click', () => {
+    tryPlayMusic();
+  });
+}
+
+const directions = [
+  {dx:'0vw',dy:'-80vh'},{dx:'0vw',dy:'80vh'},
+  {dx:'-80vw',dy:'0vh'},{dx:'80vw',dy:'0vh'},
+  {dx:'-70vw',dy:'-70vh'},{dx:'70vw',dy:'-70vh'},
+  {dx:'-70vw',dy:'70vh'},{dx:'70vw',dy:'70vh'},
+  {dx:'0vw',dy:'-60vh'},{dx:'0vw',dy:'60vh'},
+  {dx:'-60vw',dy:'0vh'},{dx:'60vw',dy:'0vh'}
+];
+
+function rand(min,max){return Math.random()*(max-min)+min;}
+function randomGradient(){
+  const arr=[
+    ['#ff758c','#ff7eb3'], ['#a18cd1','#fbc2eb'],
+    ['#f6d365','#fda085'], ['#84fab0','#8fd3f4'],
+    ['#f093fb','#f5576c'], ['#4facfe','#00f2fe'],
+    ['#43e97b','#38f9d7'], ['#fa709a','#fee140'],
+    ['#30cfd0','#330867'], ['#5ee7df','#b490ca']
+  ];
+  const [c1,c2]=arr[Math.floor(Math.random()*arr.length)];
+  return `linear-gradient(135deg,${c1},${c2})`;
+}
+
+function heartXY(t){
+  const s = 16;
+  const x = s * (16 * Math.sin(t)**3);
+  const y = -s * (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+  return {x: x+'px', y: y+'px'};
+}
+
+function createMsg(i,total){
+  const el = document.createElement('div');
+  el.className = 'msg';
+
+  const d = directions[Math.floor(Math.random()*directions.length)];
+  el.style.setProperty('--dx', d.dx);
+  el.style.setProperty('--dy', d.dy);
+  el.style.setProperty('--rot', rand(-55,55)+'deg');
+  el.style.setProperty('--dur', (rand(6.8,8.6))+'s');
+  el.style.setProperty('--delay', (i*0.11 + rand(0,0.35))+'s');
+  el.style.setProperty('--bg', randomGradient());
+
+  const t = (i / total) * Math.PI * 2;
+  const {x,y} = heartXY(t);
+  el.style.setProperty('--heart-x', x);
+  el.style.setProperty('--heart-y', y);
+  el.style.setProperty('--heart-rot', rand(-18,18)+'deg');
+
+  const span = document.createElement('span');
+  span.className = 'text';
+  span.textContent = tips[Math.floor(Math.random()*tips.length)];
+  el.appendChild(span);
+
+  const delay = parseFloat(el.style.getPropertyValue('--delay'));
+  const dur   = parseFloat(el.style.getPropertyValue('--dur'));
+  const switchAt = delay + dur * 0.86;
+  const switchTimer = setTimeout(()=>{ el.classList.add('heart-mode'); }, switchAt*1000);
+
+  el.addEventListener('animationend',()=>{
+    clearTimeout(switchTimer);
+    el.classList.add('heart-mode','locked','pulse');
+
+    const spread = rand(140, 260);
+    const ang    = rand(0, Math.PI*2);
+    const bx = Math.cos(ang)*spread;
+    const by = Math.sin(ang)*spread;
+    el.style.setProperty('--bx', bx+'px');
+    el.style.setProperty('--by', by+'px');
+  }, {once:true});
+
+  stage.appendChild(el);
+}
+
+function finalBurst(){
+  stage.querySelectorAll('.msg.locked').forEach(el=>{
+    el.classList.remove('pulse');
+    const jitter = rand(0, 200);
+    setTimeout(()=> el.classList.add('burst'), jitter);
+    el.addEventListener('animationend',()=> el.remove(), {once:true});
+  });
+}
+
+function play(){
+  stage.querySelectorAll('.msg').forEach(n=>n.remove());
+  title.style.opacity = 0;
+
+  const TOTAL = 220;
+  for(let i=0;i<TOTAL;i++) createMsg(i,TOTAL);
+
+  setTimeout(()=>{ title.style.opacity = 1; }, 1400);
+
+  const TOTAL_TIME_MS = (8.6 + 0.35 + 0.3 + 2.2) * 1000;
+  setTimeout(finalBurst, TOTAL_TIME_MS);
+}
+
+// 初始化
+setupMusic();
+play();
+replay.onclick = play;
+</script>
+</body>
 <body>
 <script>
 function clickEffect() {
